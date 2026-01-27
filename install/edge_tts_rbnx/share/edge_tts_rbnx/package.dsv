@@ -1,0 +1,15 @@
+source;share/edge_tts_rbnx/hook/path.ps1
+source;share/edge_tts_rbnx/hook/path.dsv
+source;share/edge_tts_rbnx/hook/path.sh
+source;share/edge_tts_rbnx/hook/pythonpath.ps1
+source;share/edge_tts_rbnx/hook/pythonpath.dsv
+source;share/edge_tts_rbnx/hook/pythonpath.sh
+source;share/edge_tts_rbnx/hook/pythonscriptspath.ps1
+source;share/edge_tts_rbnx/hook/pythonscriptspath.dsv
+source;share/edge_tts_rbnx/hook/pythonscriptspath.sh
+source;share/edge_tts_rbnx/hook/ament_prefix_path.ps1
+source;share/edge_tts_rbnx/hook/ament_prefix_path.dsv
+source;share/edge_tts_rbnx/hook/ament_prefix_path.sh
+source;../../build/edge_tts_rbnx/share/edge_tts_rbnx/hook/pythonpath_develop.ps1
+source;../../build/edge_tts_rbnx/share/edge_tts_rbnx/hook/pythonpath_develop.dsv
+source;../../build/edge_tts_rbnx/share/edge_tts_rbnx/hook/pythonpath_develop.sh

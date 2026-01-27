@@ -1,0 +1,11 @@
+edge_tts_rbnx_node.py
+package.xml
+setup.py
+edge_tts_rbnx.egg-info/PKG-INFO
+edge_tts_rbnx.egg-info/SOURCES.txt
+edge_tts_rbnx.egg-info/dependency_links.txt
+edge_tts_rbnx.egg-info/entry_points.txt
+edge_tts_rbnx.egg-info/requires.txt
+edge_tts_rbnx.egg-info/top_level.txt
+edge_tts_rbnx.egg-info/zip-safe
+resource/edge_tts_rbnx

@@ -1,0 +1,20 @@
+running develop
+running egg_info
+creating edge_tts_rbnx.egg-info
+writing edge_tts_rbnx.egg-info/PKG-INFO
+writing dependency_links to edge_tts_rbnx.egg-info/dependency_links.txt
+writing entry points to edge_tts_rbnx.egg-info/entry_points.txt
+writing requirements to edge_tts_rbnx.egg-info/requires.txt
+writing top-level names to edge_tts_rbnx.egg-info/top_level.txt
+writing manifest file 'edge_tts_rbnx.egg-info/SOURCES.txt'
+reading manifest file 'edge_tts_rbnx.egg-info/SOURCES.txt'
+writing manifest file 'edge_tts_rbnx.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/syswonder/.robonix/packages/edge-tts-rbnx/install/edge_tts_rbnx/lib/python3.10/site-packages/edge-tts-rbnx.egg-link (link to .)
+Installing edge_tts_rbnx_node script to /home/syswonder/.robonix/packages/edge-tts-rbnx/install/edge_tts_rbnx/bin
+
+Installed /home/syswonder/.robonix/packages/edge-tts-rbnx/build/edge_tts_rbnx
+running symlink_data
+creating /home/syswonder/.robonix/packages/edge-tts-rbnx/install/edge_tts_rbnx/share/ament_index/resource_index/packages
+symbolically linking /home/syswonder/.robonix/packages/edge-tts-rbnx/build/edge_tts_rbnx/resource/edge_tts_rbnx -> /home/syswonder/.robonix/packages/edge-tts-rbnx/install/edge_tts_rbnx/share/ament_index/resource_index/packages
+symbolically linking /home/syswonder/.robonix/packages/edge-tts-rbnx/build/edge_tts_rbnx/package.xml -> /home/syswonder/.robonix/packages/edge-tts-rbnx/install/edge_tts_rbnx/share/edge_tts_rbnx

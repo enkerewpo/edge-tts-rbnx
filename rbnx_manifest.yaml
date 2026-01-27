@@ -1,0 +1,17 @@
+package:
+  name: edge-tts-rbnx
+  version: 0.0.1
+  description: Edge TTS package for Robonix text-to-speech primitive capability
+  maintainer: wheatfox
+  maintainer_email: wheatfox17@icloud.com
+  url: https://github.com/enkerewpo/edge-tts-rbnx
+  license: Apache-2.0
+  
+primitives:
+  - name: prm::speech.tts
+    version: 0.0.1
+    start_script: rbnx/start.sh    
+    stop_script: rbnx/stop.sh  
+    input_schema: '{"text":"speech/tts/text"}'              
+    output_schema: '{"status":"speech/tts/status"}'
+    metadata: '{"voice":"zh-CN-XiaoyiNeural"}'  
