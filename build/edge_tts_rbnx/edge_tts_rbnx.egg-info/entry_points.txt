@@ -1,2 +1,0 @@
-[console_scripts]
-edge_tts_rbnx_node = edge_tts_rbnx_node:main
