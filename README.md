@@ -1,10 +1,12 @@
 # edge-tts-rbnx
 
-Edge TTS package for Robonix text-to-speech primitive capability.
+Edge TTS package for Robonix text-to-speech primitive and **speak skill** (for RTDL skill-only invocation).
 
 ## Description
 
-This package provides a ROS2 primitive for text-to-speech synthesis using Microsoft Edge TTS. It receives text messages and synthesizes them into speech audio, which is then played through the system audio output.
+This package provides:
+1. A ROS2 **primitive** `prm::speech.tts` for TTS synthesis.
+2. A **skill** `skl::speak` that wraps the primitive so RTDL (and other skill-only callers) can invoke TTS without calling primitives directly.
 
 ## Primitive
 
@@ -12,10 +14,18 @@ This package provides a ROS2 primitive for text-to-speech synthesis using Micros
 - **Input**: `text` (std_msgs/String) - Text to be synthesized
 - **Output**: `status` (std_msgs/Bool) - Success status of the operation
 
+## Skill (RTDL / skill-only)
+
+- **Name**: `skl::speak`
+- **Start topic**: `/robot1/skill/speak/start` (std_msgs/String, JSON)
+- **Status topic**: `/robot1/skill/speak/status` (std_msgs/String, JSON)
+- **Start args**: `{"text": "string (required)", "voice": "string (optional)"}`  
+  The skill resolves `prm::speech.tts` via QueryPrimitive, publishes `text` to the primitive, and reports skill status when TTS completes.
+
 ## Topics
 
-- **Input Topic**: `speech/tts/text` (std_msgs/String)
-- **Output Topic**: `speech/tts/status` (std_msgs/Bool)
+- **Primitive input**: `speech/tts/text` (std_msgs/String)
+- **Primitive output**: `speech/tts/status` (std_msgs/Bool)
 
 ## Requirements
 

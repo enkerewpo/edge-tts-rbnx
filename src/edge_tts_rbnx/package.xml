@@ -9,6 +9,7 @@
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
+  <depend>robonix_sdk</depend>
 
   <exec_depend>python3-edge-tts</exec_depend>
   <exec_depend>python3-pydub</exec_depend>

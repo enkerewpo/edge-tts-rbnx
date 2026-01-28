@@ -1,17 +1,41 @@
+# Robonix Package Manifest
+# This file defines the primitives and skills provided by this package
+# Format version: 2.0 (EAIOS Architecture)
+#
+# Note:
+# - Primitives must conform to standard specifications
+# - Skills wrap primitives for RTDL (skill-only) invocation
+# - JSON fields (input_schema, output_schema, metadata, start_args, status) must be valid JSON strings
+
 package:
   name: edge-tts-rbnx
   version: 0.0.1
-  description: Edge TTS package for Robonix text-to-speech primitive capability
+  description: Edge TTS package for Robonix text-to-speech primitive and speak skill
   maintainer: wheatfox
   maintainer_email: wheatfox17@icloud.com
   url: https://github.com/enkerewpo/edge-tts-rbnx
   license: Apache-2.0
-  
+  build_script: rbnx/build.sh
+
 primitives:
   - name: prm::speech.tts
     version: 0.0.1
-    start_script: rbnx/start.sh    
-    stop_script: rbnx/stop.sh  
-    input_schema: '{"text":"speech/tts/text"}'              
+    start_script: rbnx/start.sh
+    stop_script: rbnx/stop.sh
+    input_schema: '{"text":"speech/tts/text"}'
     output_schema: '{"status":"speech/tts/status"}'
-    metadata: '{"voice":"zh-CN-XiaoyiNeural"}'  
+    metadata: '{"voice":"zh-CN-XiaoyiNeural"}'
+
+# Skills provided by this package (wrap TTS primitive for RTDL skill-only use)
+skills:
+  - name: skl::speak
+    type: basic
+    start_topic: /robot1/skill/speak/start
+    status_topic: /robot1/skill/speak/status
+    entry: bash rbnx/start_speak.sh
+    start_args: '{"text":"string (required, text to synthesize and speak)","voice":"string (optional, e.g. zh-CN-XiaoyiNeural)"}'
+    status: '{"state":"string","result":"any"}'
+    metadata: '{"domain":"indoor","capability":["tts","speech"]}'
+    version: 0.0.1
+    start_script: rbnx/start_speak.sh
+    stop_script: rbnx/stop_speak.sh  
