@@ -60,10 +60,13 @@ class SpeakSkill(Node):
         self.start_subscriber = self.create_subscription(
             String, self.start_topic, self.start_callback, 10
         )
-        self.get_logger().info(f"Subscribing to start topic: {self.start_topic}")
+        self.get_logger().info(
+            f"Subscribing to start topic: {self.start_topic}")
 
-        self.status_publisher = self.create_publisher(String, self.status_topic, 10)
-        self.get_logger().info(f"Publishing to status topic: {self.status_topic}")
+        self.status_publisher = self.create_publisher(
+            String, self.status_topic, 10)
+        self.get_logger().info(
+            f"Publishing to status topic: {self.status_topic}")
 
         if self.tts_text_topic:
             self.tts_text_publisher = self.create_publisher(
@@ -225,7 +228,8 @@ class SpeakSkill(Node):
             )
 
             import threading
-            thread = threading.Thread(target=self._run_speak, args=(skill_id, text), daemon=True)
+            thread = threading.Thread(
+                target=self._run_speak, args=(skill_id, text), daemon=True)
             thread.start()
 
         except json.JSONDecodeError as e:
@@ -238,15 +242,27 @@ class SpeakSkill(Node):
             import traceback
 
             self.get_logger().error(f"Traceback:\n{traceback.format_exc()}")
-            self._publish_status("unknown", "error", {"error": str(e)}, errno=5)
+            self._publish_status("unknown", "error", {
+                                 "error": str(e)}, errno=5)
 
     def _run_speak(self, skill_id, text):
         """Publish text to TTS primitive and wait for status, then publish skill status."""
         try:
             msg = String()
             msg.data = text
-            self.tts_text_publisher.publish(msg)
-            self.get_logger().info("Published text to TTS primitive")
+            if self.tts_text_publisher is not None:
+                self.tts_text_publisher.publish(msg)
+                self.get_logger().info("Published text to TTS primitive")
+            else:
+                self.get_logger().error("TTS text publisher is not initialized")
+                self._publish_status(
+                    skill_id,
+                    "error",
+                    {"error": "TTS text publisher is not initialized"},
+                    errno=9,
+                )
+                self.speak_in_progress = False
+                return
 
             timeout = 60.0
             start_time = time.time()
@@ -257,7 +273,8 @@ class SpeakSkill(Node):
                         self._publish_status(
                             skill_id,
                             "finished",
-                            {"message": "Speech completed", "text_length": len(text)},
+                            {"message": "Speech completed",
+                                "text_length": len(text)},
                             errno=0,
                         )
                     else:
@@ -314,7 +331,8 @@ class SpeakSkill(Node):
 
         if (state == "error" or errno != 0) and "error" not in status_msg:
             status_msg["error"] = (
-                result.get("error", f"Skill execution failed: state={state}, errno={errno}")
+                result.get(
+                    "error", f"Skill execution failed: state={state}, errno={errno}")
                 if isinstance(result, dict)
                 else f"Skill execution failed: state={state}, errno={errno}"
             )

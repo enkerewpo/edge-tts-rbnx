@@ -6,9 +6,11 @@ package_name = 'edge_tts_rbnx'
 
 # Manifest is at repo root; use relative path (colcon requires relative in data_files)
 _manifest_rel = os.path.join('..', '..', 'rbnx_manifest.yaml')
-_manifest_abs = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), _manifest_rel))
+_manifest_abs = os.path.normpath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), _manifest_rel))
 data_files = [
-    ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
+    ('share/ament_index/resource_index/packages',
+     ['resource/' + package_name]),
     ('share/' + package_name, ['package.xml']),
 ]
 if os.path.isfile(_manifest_abs):
