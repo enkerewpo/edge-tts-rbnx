@@ -31,44 +31,45 @@ class EdgeTTSNode(Node):
         
         # Parameters
         self.declare_parameter('voice', 'zh-CN-XiaoyiNeural')
-        self.declare_parameter('volume', '30%')
+        self.declare_parameter('volume', '100%')
         self.declare_parameter('device', '')
         
         self.voice = self.get_parameter('voice').get_parameter_value().string_value
         self.volume = self.get_parameter('volume').get_parameter_value().string_value
         self.device = self.get_parameter('device').get_parameter_value().string_value
         
-        # Primitive input/output topics
-        # Input: text (std_msgs/String)
-        # Output: status (std_msgs/Bool)
+        # Primitive input/output topics (must match rbnx_manifest input_schema/output_schema)
+        text_topic = 'speech/tts/text'
+        status_topic = 'speech/tts/status'
         self.sub_text = self.create_subscription(
-            String, 'text', self.text_callback, 10
+            String, text_topic, self.text_callback, 10
         )
-        
-        self.pub_status = self.create_publisher(
-            Bool, 'status', 10
+        self.pub_status = self.create_publisher(Bool, status_topic, 10)
+        self.logger.info(
+            f"Edge TTS Node initialized: voice={self.voice}, volume={self.volume}, "
+            f"subscribed to '{text_topic}', publishing to '{status_topic}'"
         )
-        
-        self.logger.info(f"Edge TTS Node initialized: voice={self.voice}, volume={self.volume}")
         if self.device:
             self.logger.info(f"Using audio device: {self.device}")
     
     def text_callback(self, msg):
         """Handle text input and synthesize speech"""
         text = msg.data.strip()
+        preview = (text[:80] + '...') if len(text) > 80 else text
+        self.logger.info(f"[prm] Received text on speech/tts/text, len={len(text)}, preview='{preview}'")
         if not text:
-            self.logger.warning("Empty text received")
+            self.logger.warning("[prm] Empty text received, publishing status=False")
             self._publish_status(False)
             return
         
-        self.logger.info(f"Received text: '{text}'")
-        
         # Run async TTS in executor
         try:
+            self.logger.info("[prm] Starting TTS synthesis...")
             asyncio.run(self.speak_text(text))
+            self.logger.info("[prm] TTS finished successfully, publishing status=True")
             self._publish_status(True)
         except Exception as e:
-            self.logger.error(f"TTS failed: {e}", exc_info=True)
+            self.logger.error(f"[prm] TTS failed: {e}", exc_info=True)
             self._publish_status(False)
     
     def _publish_status(self, success: bool):
@@ -79,7 +80,7 @@ class EdgeTTSNode(Node):
     
     async def speak_text(self, text: str):
         """Synthesize and play text using Edge TTS"""
-        self.logger.info(f"Starting TTS: text='{text}', voice='{self.voice}', volume='{self.volume}'")
+        self.logger.info(f"[prm] Starting TTS: text_len={len(text)}, voice={self.voice}, volume={self.volume}")
         
         # Get audio bytes from Edge TTS
         audio_bytes = b""
@@ -95,7 +96,7 @@ class EdgeTTSNode(Node):
             self.logger.error("No audio data received")
             raise RuntimeError("No audio data received from TTS")
         
-        self.logger.info(f"Received {len(audio_bytes)} bytes of audio data")
+        self.logger.info(f"[prm] Received {len(audio_bytes)} bytes of audio data")
         
         # Convert MP3 to WAV
         try:
@@ -150,7 +151,7 @@ class EdgeTTSNode(Node):
                     ["pactl", "set-sink-volume", self.device, self.volume],
                     stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, timeout=5
                 )
-                self.logger.info(f"PulseAudio sink {self.device} configured: volume={self.volume}")
+                self.logger.info(f"[prm] PulseAudio sink {self.device} configured: volume={self.volume}")
         except Exception as e:
             self.logger.debug(f"Failed to configure PulseAudio: {e}")
     
@@ -163,7 +164,7 @@ class EdgeTTSNode(Node):
                 capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0:
-                self.logger.info("Audio played successfully with paplay")
+                self.logger.info("[prm] Audio played successfully with paplay")
                 return
         except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             self.logger.debug(f"paplay failed: {e}, trying aplay...")

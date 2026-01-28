@@ -71,7 +71,7 @@ ros2 topic echo /speech/tts/status
 The node supports the following ROS2 parameters:
 
 - `voice` (default: `zh-CN-XiaoyiNeural`) - Voice to use for synthesis
-- `volume` (default: `30%`) - Audio output volume
+- `volume` (default: `100%`) - Audio output volume
 - `device` (default: `""`) - Audio device to use (empty for auto-detection)
 
 ## License
