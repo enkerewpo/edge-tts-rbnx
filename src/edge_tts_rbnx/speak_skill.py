@@ -91,6 +91,9 @@ class SpeakSkill(Node):
 
         self.speak_in_progress = False
         self.current_skill_id = None
+        self._current_speak_text = None
+        self._target_replaced = False
+        self._pending_text = None
 
         self.get_logger().info("Speak skill initialized")
 
@@ -188,14 +191,31 @@ class SpeakSkill(Node):
             )
 
             if self.speak_in_progress:
-                self.get_logger().warn(
-                    "Speak already in progress, ignoring request"
+                if text == self._current_speak_text or text == self._pending_text:
+                    self.get_logger().info(
+                        "Same text as current/pending (len=%d), acknowledging only (no re-speak)"
+                        % len(text)
+                    )
+                    self.current_skill_id = skill_id
+                    self._publish_status(
+                        skill_id,
+                        "running",
+                        {"message": "Speak in progress (same text)"},
+                        errno=0,
+                    )
+                    return
+                self.get_logger().info(
+                    "New speak request while in progress, replacing with new text (len=%d)"
+                    % len(text)
                 )
+                self.current_skill_id = skill_id
+                self._pending_text = text
+                self._target_replaced = True
                 self._publish_status(
                     skill_id,
-                    "error",
-                    {"error": "Operation already in progress"},
-                    errno=1,
+                    "running",
+                    {"message": "Target replaced, will speak new text"},
+                    errno=0,
                 )
                 return
 
@@ -220,6 +240,7 @@ class SpeakSkill(Node):
                 return
 
             self.current_skill_id = skill_id
+            self._current_speak_text = text
             self.speak_in_progress = True
             self.tts_status_received = None
 
@@ -248,12 +269,7 @@ class SpeakSkill(Node):
     def _run_speak(self, skill_id, text):
         """Publish text to TTS primitive and wait for status, then publish skill status."""
         try:
-            msg = String()
-            msg.data = text
-            if self.tts_text_publisher is not None:
-                self.tts_text_publisher.publish(msg)
-                self.get_logger().info("Published text to TTS primitive")
-            else:
+            if self.tts_text_publisher is None:
                 self.get_logger().error("TTS text publisher is not initialized")
                 self._publish_status(
                     skill_id,
@@ -262,11 +278,33 @@ class SpeakSkill(Node):
                     errno=9,
                 )
                 self.speak_in_progress = False
+                self._current_speak_text = None
                 return
 
             timeout = 60.0
             start_time = time.time()
+            msg = String()
+            msg.data = text
+            self.tts_text_publisher.publish(msg)
+            self._current_speak_text = text
+            self.get_logger().info("Published text to TTS primitive")
             while (time.time() - start_time) < timeout:
+                if self._target_replaced and self._pending_text is not None:
+                    self.get_logger().info(
+                        "Speak target replaced, switching to new text (len=%d)"
+                        % len(self._pending_text)
+                    )
+                    self._target_replaced = False
+                    skill_id = self.current_skill_id
+                    text = self._pending_text
+                    self._pending_text = None
+                    self._current_speak_text = text
+                    msg = String()
+                    msg.data = text
+                    self.tts_text_publisher.publish(msg)
+                    self.tts_status_received = None
+                    start_time = time.time()
+                    continue
                 if self.tts_status_received is not None:
                     success = bool(self.tts_status_received)
                     if success:
@@ -285,6 +323,7 @@ class SpeakSkill(Node):
                             errno=6,
                         )
                     self.speak_in_progress = False
+                    self._current_speak_text = None
                     return
                 time.sleep(0.1)
 
@@ -295,6 +334,7 @@ class SpeakSkill(Node):
                 errno=7,
             )
             self.speak_in_progress = False
+            self._current_speak_text = None
 
         except Exception as e:
             self.get_logger().error(f"Error in _run_speak: {e}")
@@ -305,6 +345,7 @@ class SpeakSkill(Node):
                 skill_id, "error", {"error": str(e)}, errno=8
             )
             self.speak_in_progress = False
+            self._current_speak_text = None
 
     def _publish_status(self, skill_id, state, result, errno=0):
         """
